@@ -14,6 +14,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +37,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.HourglassBottom
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PowerSettingsNew
@@ -71,6 +73,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.data.models.AccountStats
 import com.example.data.models.ActiveVpnProfile
 import com.example.vpn.VpnMetrics
 import com.example.vpn.VpnStatus
@@ -81,6 +84,7 @@ fun HiddifyMainScreen(
     metrics: VpnMetrics,
     activeProfile: ActiveVpnProfile?,
     savedHintWord: String?,
+    accountStats: AccountStats?,
     isFetchingConfig: Boolean,
     onConnectWithHint: (String) -> Unit,
     onToggleVpn: () -> Unit,
@@ -292,6 +296,39 @@ fun HiddifyMainScreen(
                 }
             }
 
+            // User Account Stats Display (Remaining Days & Traffic for Elderly Users)
+            AnimatedVisibility(
+                visible = accountStats != null,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                accountStats?.let { stats ->
+                    val isWarning = stats.isExpired || stats.isTrafficExhausted
+                    val badgeBg = if (isWarning) Color(0x33EF5350) else Color(0x2281C784)
+                    val badgeBorder = if (isWarning) Color(0x66EF5350) else Color(0x5581C784)
+                    val textColor = if (isWarning) Color(0xFFFF8A80) else Color(0xFF81C784)
+
+                    Box(
+                        modifier = Modifier
+                            .padding(top = 16.dp, bottom = 4.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(badgeBg)
+                            .border(1.dp, badgeBorder, RoundedCornerShape(20.dp))
+                            .padding(horizontal = 18.dp, vertical = 9.dp)
+                            .testTag("tvUserStats"),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stats.getFormattedPersianText(),
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = textColor,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(20.dp))
 
             // Hint Word Input Section (Visible only when no hint word is saved)
@@ -473,6 +510,32 @@ fun HiddifyMainScreen(
                                     color = Color.White
                                 )
                             }
+                        }
+                    }
+
+                    accountStats?.let { stats ->
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(Color(0xFF141414))
+                                .padding(horizontal = 14.dp, vertical = 9.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "اعتبار: ${if (stats.remainingDays.equals("نامحدود", true)) "نامحدود" else "${stats.remainingDays} روز"}",
+                                fontSize = 12.sp,
+                                color = if (stats.isExpired) Color(0xFFEF5350) else Color(0xFF81C784),
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "باقیمانده: ${stats.remainingGB} از ${stats.totalGB} گیگ",
+                                fontSize = 12.sp,
+                                color = if (stats.isTrafficExhausted) Color(0xFFEF5350) else Color(0xFF81C784),
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
                 }

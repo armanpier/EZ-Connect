@@ -79,3 +79,23 @@ data class ActiveVpnProfile(
     val sni: String = "",
     val flow: String = ""
 )
+
+data class AccountStats(
+    val remainingDays: String = "نامحدود",
+    val remainingGB: String = "نامحدود",
+    val totalGB: String = "نامحدود",
+    val isExpired: Boolean = false,
+    val isTrafficExhausted: Boolean = false
+) {
+    fun getFormattedPersianText(): String {
+        return when {
+            isExpired -> "اعتبار زمانی حساب به پایان رسیده است"
+            isTrafficExhausted -> "حجم ترافیک حساب تمام شده است"
+            else -> {
+                val daysText = if (remainingDays.equals("نامحدود", true) || remainingDays == "-1") "زمان: نامحدود" else "اعتبار: $remainingDays روز"
+                val gbText = if (remainingGB.equals("نامحدود", true) || remainingGB == "-1") "حجم: نامحدود" else "باقیمانده: $remainingGB گیگابایت"
+                "$daysText  •  $gbText"
+            }
+        }
+    }
+}

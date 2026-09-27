@@ -62,6 +62,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _savedHintWord = MutableStateFlow(repository.getSavedHintWord())
     val savedHintWord = _savedHintWord.asStateFlow()
 
+    private val _accountStats = MutableStateFlow(repository.getSavedAccountStats())
+    val accountStats = _accountStats.asStateFlow()
+
     private val _isFetchingConfig = MutableStateFlow(false)
     val isFetchingConfig = _isFetchingConfig.asStateFlow()
 
@@ -82,9 +85,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             repository.ensureDefaultSampleDataIfEmpty()
             val savedWord = repository.getSavedHintWord()
             _savedHintWord.value = savedWord
+            _accountStats.value = repository.getSavedAccountStats()
             val savedProfile = repository.getSavedProfile()
             if (savedProfile != null && VpnController.activeProfile.value == null) {
                 VpnController.setActiveProfile(savedProfile)
+            }
+            // Quietly refresh stats if hint word exists
+            if (!savedWord.isNullOrEmpty()) {
+                refreshStats()
+            }
+        }
+    }
+
+    fun refreshStats() {
+        val word = _savedHintWord.value ?: return
+        viewModelScope.launch {
+            val result = repository.fetchClientByRemark(word)
+            result.onSuccess {
+                _accountStats.value = repository.getSavedAccountStats()
             }
         }
     }
@@ -105,6 +123,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
             result.onSuccess { profile ->
                 _savedHintWord.value = word
+                _accountStats.value = repository.getSavedAccountStats()
                 VpnController.setActiveProfile(profile)
                 _userMessage.value = "حساب با موفقیت تنظیم شد"
                 onReadyToStartVpn(profile)
@@ -117,6 +136,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun resetHintWord() {
         repository.clearSavedHintWord()
         _savedHintWord.value = null
+        _accountStats.value = null
         VpnController.setActiveProfile(null)
         _userMessage.value = "کلمه اختصاصی حذف شد. می‌توانید کلمه جدیدی وارد کنید."
     }

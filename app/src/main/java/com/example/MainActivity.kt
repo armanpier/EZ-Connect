@@ -63,6 +63,7 @@ fun MainHiddifyAppContent(viewModel: MainViewModel) {
     val currentPanel by viewModel.currentPanel.collectAsStateWithLifecycle()
     val savedHintWord by viewModel.savedHintWord.collectAsStateWithLifecycle()
     val isFetchingConfig by viewModel.isFetchingConfig.collectAsStateWithLifecycle()
+    val accountStats by viewModel.accountStats.collectAsStateWithLifecycle()
     val middlewareUrl by viewModel.middlewareUrl.collectAsStateWithLifecycle()
     val userMessage by viewModel.userMessage.collectAsStateWithLifecycle()
 
@@ -141,6 +142,7 @@ fun MainHiddifyAppContent(viewModel: MainViewModel) {
                 metrics = metrics,
                 activeProfile = activeProfile,
                 savedHintWord = savedHintWord,
+                accountStats = accountStats,
                 isFetchingConfig = isFetchingConfig,
                 onConnectWithHint = { word ->
                     viewModel.fetchAndConnect(word) { fetchedProfile ->

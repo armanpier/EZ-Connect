@@ -50,6 +50,37 @@ class ThreeXuiRepository(context: Context) {
             .remove("saved_profile_port")
             .remove("saved_profile_protocol")
             .remove("saved_profile_uuid")
+            .remove("stats_remaining_days")
+            .remove("stats_remaining_gb")
+            .remove("stats_total_gb")
+            .remove("stats_is_expired")
+            .remove("stats_is_traffic_exhausted")
+            .apply()
+    }
+
+    fun getSavedAccountStats(): com.example.data.models.AccountStats? {
+        val days = prefs.getString("stats_remaining_days", null) ?: return null
+        val remainingGB = prefs.getString("stats_remaining_gb", "نامحدود") ?: "نامحدود"
+        val totalGB = prefs.getString("stats_total_gb", "نامحدود") ?: "نامحدود"
+        val isExpired = prefs.getBoolean("stats_is_expired", false)
+        val isTrafficExhausted = prefs.getBoolean("stats_is_traffic_exhausted", false)
+
+        return com.example.data.models.AccountStats(
+            remainingDays = days,
+            remainingGB = remainingGB,
+            totalGB = totalGB,
+            isExpired = isExpired,
+            isTrafficExhausted = isTrafficExhausted
+        )
+    }
+
+    fun saveAccountStats(stats: com.example.data.models.AccountStats) {
+        prefs.edit()
+            .putString("stats_remaining_days", stats.remainingDays)
+            .putString("stats_remaining_gb", stats.remainingGB)
+            .putString("stats_total_gb", stats.totalGB)
+            .putBoolean("stats_is_expired", stats.isExpired)
+            .putBoolean("stats_is_traffic_exhausted", stats.isTrafficExhausted)
             .apply()
     }
 
@@ -129,13 +160,38 @@ class ThreeXuiRepository(context: Context) {
 
             val responseCode = connection.responseCode
             if (responseCode == 200) {
-                val rawConfig = connection.inputStream.bufferedReader().use { it.readText() }
-                val parsed = ProxyLinkGenerator.parseRawConfig(rawConfig)
+                val rawResponse = connection.inputStream.bufferedReader().use { it.readText() }
+                var configPayload = rawResponse.trim()
+
+                // Check if response is structured JSON with config and stats
+                if (configPayload.startsWith("{")) {
+                    try {
+                        val json = org.json.JSONObject(configPayload)
+                        if (json.has("config")) {
+                            configPayload = json.getString("config").trim()
+                        }
+                        if (json.has("stats")) {
+                            val statsObj = json.optJSONObject("stats")
+                            if (statsObj != null) {
+                                val parsedStats = com.example.data.models.AccountStats(
+                                    remainingDays = statsObj.optString("remainingDays", "نامحدود"),
+                                    remainingGB = statsObj.optString("remainingGB", "نامحدود"),
+                                    totalGB = statsObj.optString("totalGB", "نامحدود"),
+                                    isExpired = statsObj.optBoolean("isExpired", false),
+                                    isTrafficExhausted = statsObj.optBoolean("isTrafficExhausted", false)
+                                )
+                                saveAccountStats(parsedStats)
+                            }
+                        }
+                    } catch (_: Exception) {}
+                }
+
+                val parsed = ProxyLinkGenerator.parseRawConfig(configPayload)
                 if (parsed != null) {
                     saveHintWord(cleanRemark)
                     saveProfile(parsed)
                     return@withContext Result.success(parsed)
-                } else if (rawConfig.isNotBlank()) {
+                } else if (configPayload.isNotBlank()) {
                     // Try to construct fallback profile from link
                     val fallbackProfile = ActiveVpnProfile(
                         id = cleanRemark,
@@ -146,7 +202,7 @@ class ThreeXuiRepository(context: Context) {
                         protocol = "vless",
                         clientEmail = cleanRemark,
                         clientUuid = cleanRemark,
-                        proxyLink = rawConfig.trim()
+                        proxyLink = configPayload
                     )
                     saveHintWord(cleanRemark)
                     saveProfile(fallbackProfile)
