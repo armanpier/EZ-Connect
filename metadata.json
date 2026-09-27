@@ -1,0 +1,6 @@
+{
+  "name": "3X-UI VPN",
+  "description": "A streamlined Android VPN client to connect to 3X-UI proxy panels, synchronize inbounds, monitor real-time traffic, and tunnel network traffic securely.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

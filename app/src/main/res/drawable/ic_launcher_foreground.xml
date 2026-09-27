@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Outer glow accent ring -->
+    <path
+        android:pathData="M54,22 C67,22 79,27 80,42 C81,59 70,74 54,84 C38,74 27,59 28,42 C29,27 41,22 54,22 Z"
+        android:strokeWidth="1.5"
+        android:strokeColor="#38BDF8"
+        android:fillColor="#1506B6D4" />
+
+    <!-- Main VPN Shield -->
+    <path
+        android:pathData="M54,26 C64,26 74,30 75,42 C76,57 66,69 54,78 C42,69 32,57 33,42 C34,30 44,26 54,26 Z"
+        android:fillColor="#0284C7" />
+
+    <!-- Shield Highlight (Left half) -->
+    <path
+        android:pathData="M54,26 C44,26 34,30 33,42 C32,57 42,69 54,78 Z"
+        android:fillColor="#0EA5E9" />
+
+    <!-- Secure Lock Shackle -->
+    <path
+        android:pathData="M48,46 V41 C48,37.7 50.7,35 54,35 C57.3,35 60,37.7 60,41 V46"
+        android:strokeWidth="3.2"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+
+    <!-- Lock Body -->
+    <path
+        android:pathData="M44,46 H64 C65.1,46 66,46.9 66,48 V60 C66,61.1 65.1,62 64,62 H44 C42.9,62 42,61.1 42,60 V48 C42,46.9 42.9,46 44,46 Z"
+        android:fillColor="#FFFFFF" />
+
+    <!-- Keyhole / Core Node -->
+    <path
+        android:pathData="M54,51 C52.9,51 52,51.9 52,53 C52,53.8 52.5,54.4 53.2,54.8 L52.5,58 H55.5 L54.8,54.8 C55.5,54.4 56,53.8 56,53 C56,51.9 55.1,51 54,51 Z"
+        android:fillColor="#0284C7" />
+
+    <!-- Network connection nodes below -->
+    <path
+        android:pathData="M54,78 V83 M46,80 L38,84 M62,80 L70,84"
+        android:strokeWidth="1.8"
+        android:strokeColor="#38BDF8"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M38,84 A 2.2 2.2 0 1 1 37.99 84 Z"
+        android:fillColor="#38BDF8" />
+    <path
+        android:pathData="M70,84 A 2.2 2.2 0 1 1 69.99 84 Z"
+        android:fillColor="#38BDF8" />
+    <path
+        android:pathData="M54,84 A 2.2 2.2 0 1 1 53.99 84 Z"
+        android:fillColor="#38BDF8" />
+</vector>
